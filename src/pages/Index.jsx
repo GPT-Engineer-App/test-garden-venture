@@ -3,22 +3,36 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cat, Heart, Info, Paw, Star, ArrowRight, Moon, Sun } from "lucide-react";
+import { Cat, Heart, Info, Paw, Star, ArrowRight, Moon, Sun, Gift } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Index = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [catName, setCatName] = useState("");
+  const [showNameDialog, setShowNameDialog] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => setProgress(66), 500);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const savedName = localStorage.getItem("catName");
+    if (savedName) {
+      setCatName(savedName);
+    } else {
+      setShowNameDialog(true);
+    }
   }, []);
 
   const catFacts = [
@@ -27,6 +41,9 @@ const Index = () => {
     "Cats have over 20 vocalizations",
     "The first cat in space was French",
     "Cats can jump up to 6 times their length",
+    "Cats can rotate their ears 180 degrees",
+    "A cat's nose print is unique, like a human's fingerprint",
+    "Cats can't taste sweetness",
   ];
 
   const catImages = [
@@ -34,6 +51,8 @@ const Index = () => {
     "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "https://images.unsplash.com/photo-1543852786-1cf6624b9987?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "https://images.unsplash.com/photo-1494256997604-768d1f608cac?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
   ];
 
   const toggleDarkMode = () => {
@@ -44,9 +63,32 @@ const Index = () => {
     });
   };
 
+  const handleNameSubmit = (e) => {
+    e.preventDefault();
+    if (catName.trim()) {
+      localStorage.setItem("catName", catName);
+      setShowNameDialog(false);
+      toast({
+        title: "Welcome!",
+        description: `Nice to meet you, ${catName}!`,
+      });
+    }
+  };
+
+  const generateRandomFact = () => {
+    const randomIndex = Math.floor(Math.random() * catFacts.length);
+    toast({
+      title: "Random Cat Fact",
+      description: catFacts[randomIndex],
+    });
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-b from-purple-200 to-pink-200'}`}>
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50 flex items-center space-x-4">
+        <Button variant="outline" size="icon" onClick={generateRandomFact}>
+          <Gift className="h-4 w-4" />
+        </Button>
         <Switch
           checked={isDarkMode}
           onCheckedChange={toggleDarkMode}
@@ -58,13 +100,17 @@ const Index = () => {
       </div>
       {/* Hero Section */}
       <div className="relative h-screen">
-        <Carousel className="w-full h-full">
+        <Carousel className="w-full h-full" autoplay interval={5000}>
           <CarouselContent>
             {catImages.map((image, index) => (
               <CarouselItem key={index} className="relative h-full">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center" 
+                <motion.div 
+                  className="absolute inset-0 bg-cover bg-center"
                   style={{backgroundImage: `url('${image}')`}}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1 }}
                 >
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
                     <motion.h1 
@@ -83,8 +129,18 @@ const Index = () => {
                     >
                       Discover the fascinating world of our feline friends
                     </motion.p>
+                    {catName && (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1, duration: 1 }}
+                        className="text-2xl text-purple-300 mt-4"
+                      >
+                        Welcome, {catName}!
+                      </motion.p>
+                    )}
                   </div>
-                </div>
+                </motion.div>
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -100,6 +156,35 @@ const Index = () => {
           </motion.div>
         </div>
       </div>
+
+      <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Welcome to Cat World!</DialogTitle>
+            <DialogDescription>
+              Please enter your name to personalize your experience.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleNameSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  value={catName}
+                  onChange={(e) => setCatName(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit">Save</Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       
       <div className="max-w-6xl mx-auto px-4 py-16">
         <motion.div
@@ -256,6 +341,27 @@ const Index = () => {
         >
           <h2 className="text-3xl font-bold mb-4">Cat of the Day</h2>
           <img src="https://cataas.com/cat" alt="Random Cat" className="mx-auto rounded-lg shadow-lg" />
+        </motion.div>
+
+        <motion.div
+          className="mt-16 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <h2 className="text-3xl font-bold mb-4">Cat Trivia Game</h2>
+          <p className="mb-4">Test your cat knowledge!</p>
+          <Button
+            onClick={() => {
+              toast({
+                title: "Coming Soon!",
+                description: "The Cat Trivia Game will be available in the next update!",
+              });
+            }}
+            className="bg-purple-500 hover:bg-purple-600 text-white"
+          >
+            Start Game
+          </Button>
         </motion.div>
       </div>
     </div>
