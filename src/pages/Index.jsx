@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cat, Heart, Info, Paw, Star } from "lucide-react";
+import { Cat, Heart, Info, Paw, Star, ArrowRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const Index = () => {
   const [likeCount, setLikeCount] = useState(0);
@@ -23,27 +25,57 @@ const Index = () => {
     "Cats can jump up to 6 times their length",
   ];
 
+  const catImages = [
+    "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "https://images.unsplash.com/photo-1519052537078-e6302a4968d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-200 to-pink-200">
       {/* Hero Section */}
-      <div className="relative h-[70vh] bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}>
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
-          <motion.h1 
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
-            className="text-7xl font-bold text-white text-center mb-4"
+      <div className="relative h-screen">
+        <Carousel className="w-full h-full">
+          <CarouselContent>
+            {catImages.map((image, index) => (
+              <CarouselItem key={index} className="relative h-full">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center" 
+                  style={{backgroundImage: `url('${image}')`}}
+                >
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
+                    <motion.h1 
+                      initial={{ opacity: 0, y: -50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 1 }}
+                      className="text-7xl font-bold text-white text-center mb-4"
+                    >
+                      All About Cats
+                    </motion.h1>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 1 }}
+                      className="text-xl text-white text-center"
+                    >
+                      Discover the fascinating world of our feline friends
+                    </motion.p>
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
           >
-            All About Cats
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 1 }}
-            className="text-xl text-white text-center"
-          >
-            Discover the fascinating world of our feline friends
-          </motion.p>
+            <ArrowRight className="h-10 w-10 text-white" />
+          </motion.div>
         </div>
       </div>
       
@@ -74,10 +106,17 @@ const Index = () => {
                       { trait: "Night Vision", level: 80 },
                       { trait: "Communication", level: 75 },
                     ].map((item, index) => (
-                      <li key={index} className="flex flex-col">
+                      <motion.li 
+                        key={index} 
+                        className="flex flex-col"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
                         <span className="font-medium mb-1">{item.trait}</span>
                         <Progress value={item.level} className="w-full" />
-                      </li>
+                        <span className="text-sm text-right mt-1">{item.level}%</span>
+                      </motion.li>
                     ))}
                   </ul>
                 </CardContent>
@@ -92,18 +131,24 @@ const Index = () => {
                 <CardContent>
                   <ul className="grid grid-cols-2 md:grid-cols-3 gap-6">
                     {[
-                      { name: "Siamese", origin: "Thailand" },
-                      { name: "Persian", origin: "Iran" },
-                      { name: "Maine Coon", origin: "United States" },
-                      { name: "Bengal", origin: "United States" },
-                      { name: "British Shorthair", origin: "United Kingdom" },
-                      { name: "Sphynx", origin: "Canada" },
+                      { name: "Siamese", origin: "Thailand", personality: "Vocal, Social" },
+                      { name: "Persian", origin: "Iran", personality: "Calm, Gentle" },
+                      { name: "Maine Coon", origin: "United States", personality: "Friendly, Intelligent" },
+                      { name: "Bengal", origin: "United States", personality: "Active, Playful" },
+                      { name: "British Shorthair", origin: "United Kingdom", personality: "Easygoing, Loyal" },
+                      { name: "Sphynx", origin: "Canada", personality: "Energetic, Mischievous" },
                     ].map((breed, index) => (
-                      <li key={index} className="flex flex-col items-center text-center">
+                      <motion.li 
+                        key={index} 
+                        className="flex flex-col items-center text-center p-4 bg-white rounded-lg shadow-md"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
                         <img src="/placeholder.svg" alt={breed.name} className="w-24 h-24 rounded-full mb-2 mx-auto object-cover" />
-                        <span className="font-medium">{breed.name}</span>
-                        <span className="text-sm text-gray-500">{breed.origin}</span>
-                      </li>
+                        <span className="font-medium text-lg">{breed.name}</span>
+                        <Badge variant="secondary" className="mt-1">{breed.origin}</Badge>
+                        <span className="text-sm text-gray-500 mt-2">{breed.personality}</span>
+                      </motion.li>
                     ))}
                   </ul>
                 </CardContent>
@@ -123,7 +168,7 @@ const Index = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="flex items-start"
+                        className="flex items-start bg-white p-4 rounded-lg shadow-sm"
                       >
                         <Paw className="mr-2 h-5 w-5 text-purple-500 flex-shrink-0 mt-1" />
                         <span>{fact}</span>
@@ -146,9 +191,9 @@ const Index = () => {
             >
               <Button 
                 onClick={() => setLikeCount(prev => prev + 1)}
-                className="group text-lg px-6 py-3"
+                className="group text-lg px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full shadow-lg"
               >
-                <Heart className="mr-2 h-6 w-6 group-hover:text-red-500 transition-colors" />
+                <Heart className="mr-2 h-6 w-6 group-hover:text-red-200 transition-colors" />
                 Like Cats ({likeCount})
               </Button>
             </motion.div>
