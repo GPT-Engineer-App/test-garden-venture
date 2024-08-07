@@ -3,14 +3,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cat, Heart, Info, Paw, Star, ArrowRight } from "lucide-react";
+import { Cat, Heart, Info, Paw, Star, ArrowRight, Moon, Sun } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => setProgress(66), 500);
@@ -32,8 +36,26 @@ const Index = () => {
     "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
   ];
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    toast({
+      title: isDarkMode ? "Light Mode Activated" : "Dark Mode Activated",
+      description: "Your eyes will thank you later!",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-200 to-pink-200">
+    <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-b from-purple-200 to-pink-200'}`}>
+      <div className="fixed top-4 right-4 z-50">
+        <Switch
+          checked={isDarkMode}
+          onCheckedChange={toggleDarkMode}
+          className="data-[state=checked]:bg-purple-600"
+        >
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        </Switch>
+      </div>
       {/* Hero Section */}
       <div className="relative h-screen">
         <Carousel className="w-full h-full">
@@ -87,9 +109,9 @@ const Index = () => {
         >
           <Tabs defaultValue="characteristics" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="characteristics">Characteristics</TabsTrigger>
-              <TabsTrigger value="breeds">Popular Breeds</TabsTrigger>
-              <TabsTrigger value="facts">Fun Facts</TabsTrigger>
+              <TabsTrigger value="characteristics" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">Characteristics</TabsTrigger>
+              <TabsTrigger value="breeds" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">Popular Breeds</TabsTrigger>
+              <TabsTrigger value="facts" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">Fun Facts</TabsTrigger>
             </TabsList>
             <TabsContent value="characteristics">
               <Card>
@@ -100,11 +122,11 @@ const Index = () => {
                 <CardContent>
                   <ul className="space-y-4">
                     {[
-                      { trait: "Independence", level: 90 },
-                      { trait: "Hunting Skills", level: 85 },
-                      { trait: "Flexibility", level: 95 },
-                      { trait: "Night Vision", level: 80 },
-                      { trait: "Communication", level: 75 },
+                      { trait: "Independence", level: 90, icon: "🏞️" },
+                      { trait: "Hunting Skills", level: 85, icon: "🐭" },
+                      { trait: "Flexibility", level: 95, icon: "🤸" },
+                      { trait: "Night Vision", level: 80, icon: "🌙" },
+                      { trait: "Communication", level: 75, icon: "😺" },
                     ].map((item, index) => (
                       <motion.li 
                         key={index} 
@@ -113,8 +135,17 @@ const Index = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
                       >
-                        <span className="font-medium mb-1">{item.trait}</span>
-                        <Progress value={item.level} className="w-full" />
+                        <span className="font-medium mb-1 flex items-center">
+                          <span className="mr-2">{item.icon}</span>
+                          {item.trait}
+                        </span>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${item.level}%` }}
+                          transition={{ duration: 1, delay: index * 0.1 }}
+                        >
+                          <Progress value={item.level} className="w-full" />
+                        </motion.div>
                         <span className="text-sm text-right mt-1">{item.level}%</span>
                       </motion.li>
                     ))}
@@ -148,6 +179,17 @@ const Index = () => {
                         <span className="font-medium text-lg">{breed.name}</span>
                         <Badge variant="secondary" className="mt-1">{breed.origin}</Badge>
                         <span className="text-sm text-gray-500 mt-2">{breed.personality}</span>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className="mt-2 px-3 py-1 bg-purple-500 text-white rounded-full text-sm"
+                          onClick={() => toast({
+                            title: `${breed.name} Info`,
+                            description: `The ${breed.name} is a ${breed.personality.toLowerCase()} breed from ${breed.origin}.`,
+                          })}
+                        >
+                          Learn More
+                        </motion.button>
                       </motion.li>
                     ))}
                   </ul>
@@ -190,7 +232,13 @@ const Index = () => {
               transition={{ duration: 0.3 }}
             >
               <Button 
-                onClick={() => setLikeCount(prev => prev + 1)}
+                onClick={() => {
+                  setLikeCount(prev => prev + 1);
+                  toast({
+                    title: "Thanks for the love!",
+                    description: `You've liked cats ${likeCount + 1} times!`,
+                  });
+                }}
                 className="group text-lg px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full shadow-lg"
               >
                 <Heart className="mr-2 h-6 w-6 group-hover:text-red-200 transition-colors" />
@@ -199,6 +247,16 @@ const Index = () => {
             </motion.div>
           </AnimatePresence>
         </div>
+
+        <motion.div 
+          className="mt-16 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <h2 className="text-3xl font-bold mb-4">Cat of the Day</h2>
+          <img src="https://cataas.com/cat" alt="Random Cat" className="mx-auto rounded-lg shadow-lg" />
+        </motion.div>
       </div>
     </div>
   );
